@@ -1,24 +1,8 @@
 # Деплой при push в main: SPA (papka2) + воркер helloword.
+# Если в репо не заданы CLOUDFLARE_* — job деплоя пропускается (зелёный прогон, в логе notice).
 #
-# ВАЖНО: этот workflow НЕ публикует код в «другой репозиторий GitHub».
-# Он только checkout ЭТОГО репозитория и заливает сборку в Cloudflare Workers
-# в аккаунте, который задан секретами ниже.
-#
-# Если деплой «не туда»:
-# 1) Проверьте секреты именно в ЭТОМ репо: Settings → Secrets → Actions
-#    (другой форк/репозиторий — свои секреты; старые значения = старый CF-аккаунт).
-# 2) Уточните CLOUDFLARE_ACCOUNT_ID нужного аккаунта Cloudflare и токен с правами на него.
-# 3) Имена воркеров в wrangler.toml / wrangler.jsonc (papka2, helloword) — это имена в Cloudflare.
-#
-# Secrets:
-#   CLOUDFLARE_API_TOKEN — только User API Token (префикс cfut_), шаблон «Edit Cloudflare Workers»
-#     + User → User Details → Read. НЕ подставляйте Global API Key (cfk_) — Wrangler вернёт 9109.
-#     Не используйте Account API Token (cfat_) для Wrangler — часто падает на /memberships.
-#   CLOUDFLARE_ACCOUNT_ID — Workers → обзор аккаунта
-#   VITE_HELLOWORD_BASE_URL — публичный URL воркера helloword (https://helloword.….workers.dev),
-#     без / в конце. Нужен для сборки фронта (ИИ-помощник). См. .env.production.example
-#
-# VENICE_API_KEY только в Cloudflare: wrangler secret put (не в GitHub).
+# Секrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, (опц.) VITE_HELLOWORD_BASE_URL
+# — см. комментарии внизу и Cloudflare / GitHub.
 
 name: Deploy Cloudflare Workers
 
@@ -30,7 +14,40 @@ on:
   workflow_dispatch:
 
 jobs:
+  check-cloudflare-secrets:
+    name: Проверка секретов Cloudflare
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.set.outputs.should_deploy }}
+    steps:
+      - name: Нужен ли деплой
+        id: set
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  notify-skip:
+    name: Cloudflare (без деплоя)
+    needs: check-cloudflare-secrets
+    if: needs.check-cloudflare-secrets.outputs.should_deploy != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Секреты не заданы — деплой пропущен
+        run: |
+          echo "::notice title=Cloudflare::Деплой пропущен. Задайте CLOUDFLARE_API_TOKEN и CLOUDFLARE_ACCOUNT_ID в настройках репозитория."
+          echo "https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
+          echo "Создать токен: https://dash.cloudflare.com/profile/api-tokens (шаблон «Edit Cloudflare Workers», префикс cfut_)."
+
   deploy:
+    name: Деплой в Cloudflare
+    needs: check-cloudflare-secrets
+    if: needs.check-cloudflare-secrets.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,22 +66,12 @@ jobs:
         run: |
           echo "Источник кода (этот GitHub-репозиторий): ${GITHUB_REPOSITORY}"
           echo "Ветка: ${GITHUB_REF_NAME}  коммит: ${GITHUB_SHA}"
-          echo "Цель: Cloudflare Workers (account_id из секрета CLOUDFLARE_ACCOUNT_ID), не другой GitHub-repo."
+          echo "Цель: Cloudflare Workers (account_id из секрета CLOUDFLARE_ACCOUNT_ID)."
 
-      - name: Verify Cloudflare secrets
+      - name: Verify Cloudflare tokens present
         run: |
-          SECRETS_URL="https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
-          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::error::В этом репозитории не задан секрет CLOUDFLARE_API_TOKEN."
-            echo "Откройте: ${SECRETS_URL}"
-            echo "New repository secrets → имя: CLOUDFLARE_API_TOKEN → значение: API Token из Cloudflare (Workers: Edit)."
-            echo "Создать токен: https://dash.cloudflare.com/profile/api-tokens"
-            exit 1
-          fi
-          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::error::Не задан секрет CLOUDFLARE_ACCOUNT_ID."
-            echo "Откройте: ${SECRETS_URL} → New secret → CLOUDFLARE_ACCOUNT_ID"
-            echo "Значение: Workers → слева выберите аккаунт → справа «Account ID»."
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Секреты пропали после шага check (не ожидается)."
             exit 1
           fi
           echo "Секреты Cloudflare заданы (значения в лог не выводятся)."
