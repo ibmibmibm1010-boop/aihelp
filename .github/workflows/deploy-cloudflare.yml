@@ -2,7 +2,14 @@
 # Если в репо не заданы CLOUDFLARE_* — job деплоя пропускается (зелёный прогон, в логе notice).
 #
 # Секrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, (опц.) VITE_HELLOWORD_BASE_URL
-# — см. комментарии внизу и Cloudflare / GitHub.
+#
+# Токен для `wrangler deploy` (иначе Authentication error [code: 10000]):
+#   • Лучше шаблон «Edit Cloudflare Workers» при создании токена.
+#   • Если кастомный токен — обязательно добавьте вручную:
+#       User → User Details → Read
+#       User → Memberships → Read
+#     (без них wrangler пишет «Unable to retrieve email» и падает на /workers/services/…)
+#   • Не используйте Global API Key (cfk_) — только User API Token (cfut_).
 
 name: Deploy Cloudflare Workers
 
