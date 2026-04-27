@@ -251,7 +251,8 @@ function AppShellLayout() {
         >
           <div
             className={`${shellAsideClass} m-0 h-full rounded-none border-y-0 border-l-0 lg:min-h-[calc(100vh-2rem)] lg:rounded-vibe lg:border ${
-              sidebarCompact ? "lg:mx-1 lg:my-4 lg:items-center lg:p-2" : "lg:m-4"
+              /* Совпадает с lg:py-1 у колонки доски — одна линия по верху с шапкой whiteboard */
+              sidebarCompact ? "lg:mx-1 lg:mt-1 lg:mb-4 lg:items-center lg:p-2" : "lg:m-4"
             }`}
           >
             <SidebarNavContent compact={sidebarCompact} onNavigate={closeMobile} />

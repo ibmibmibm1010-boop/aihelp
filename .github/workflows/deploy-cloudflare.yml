@@ -112,6 +112,33 @@ jobs:
           fi
           echo "Cloudflare API Token: verify OK"
 
+      - name: Права для wrangler (User Details + Memberships)
+        run: |
+          err() {
+            echo "::error::$1"
+            echo "Добавьте к User API Token: https://dash.cloudflare.com/profile/api-tokens"
+            echo "  • User → User Details → Read"
+            echo "  • User → Memberships → Read"
+            echo "Плюс Account → Workers Scripts → Edit (шаблон «Edit Cloudflare Workers»)."
+            echo "Секрет: https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
+            exit 1
+          }
+          U=$(curl -sS -o /tmp/cf_user.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/user")
+          if [ "$U" != "200" ]; then
+            cat /tmp/cf_user.json || true
+            err "GET /user → HTTP ${U}. Без User Details → Read wrangler падает (10000 / «Unable to retrieve email»)."
+          fi
+          M=$(curl -sS -o /tmp/cf_mem.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/memberships")
+          if [ "$M" != "200" ]; then
+            cat /tmp/cf_mem.json || true
+            err "GET /memberships → HTTP ${M}. Нужно User → Memberships → Read."
+          fi
+          echo "Cloudflare /user и /memberships: OK"
+
       - run: npm ci
 
       - name: Build SPA
