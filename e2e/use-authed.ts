@@ -10,11 +10,19 @@ const authFile = path.join(
   "user.json",
 );
 
-export const test = base;
-
-if (existsSync(authFile)) {
-  test.use({ storageState: authFile });
-}
+/**
+ * Важно: не вызывать `test.use({ storageState })` на `base` из `@playwright/test` — это
+ * мутирует синглтон `test` и вешает сессию на **все** тесты в воркере, включая гостей.
+ * Расширяем `base` в отдельный тип; импортируют `test` / `expect` по-прежнему только
+ * spec-и с `use-authed`, остальные — из `@playwright/test`.
+ */
+export const test = existsSync(authFile)
+  ? base.extend({
+      use: {
+        storageState: authFile,
+      },
+    })
+  : base;
 
 export { expect } from "@playwright/test";
 export type { Page } from "@playwright/test";
