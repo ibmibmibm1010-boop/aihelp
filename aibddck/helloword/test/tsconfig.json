@@ -1,0 +1,9 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"lib": ["es2024", "dom"],
+		"types": ["node"]
+	},
+	"include": ["./**/*.ts", "../worker-configuration.d.ts", "./env.d.ts"],
+	"exclude": []
+}

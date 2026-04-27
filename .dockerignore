@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.github
+.cursor
+.vite
+coverage
+backend
+*.md
+!README.md
+.env
+.env.*
+npm-debug.log*

@@ -1,0 +1,73 @@
+# E2E: Playwright + Vite (webServer в playwright.config).
+#
+# Секrets (Settings → Secrets and variables → Actions):
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY — тот же Supabase, что и для dev.
+#   E2E_USER_EMAIL, E2E_USER_PASSWORD — тестовый пользователь (для global-setup и сессии).
+# Опционально: E2E_SKIP_BOARD_E2E=1 (по умолчанию в workflow), если миграции boards на CI не настроены.
+#
+# PR из fork: секреты не передаются — job чаще всего упадёт; полный прогон — из основного репо или вручную (workflow_dispatch).
+
+name: E2E (Playwright)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    env:
+      CI: true
+      # Repository variable E2E_SKIP_BOARD_E2E=0 — прогон e2e/boards-flow; иначе по умолчанию 1 (стабильнее на CI).
+      E2E_SKIP_BOARD_E2E: ${{ vars.E2E_SKIP_BOARD_E2E != '' && vars.E2E_SKIP_BOARD_E2E || '1' }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+      E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      - name: Установка браузеров Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E
+        run: npx playwright test --reporter=line,github,html
+
+      - name: Загрузить HTML-отчёт Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Загрузить test-results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7

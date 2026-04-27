@@ -1,0 +1,3 @@
+# Скопируй в `.dev.vars` и подставь ключ (для `wrangler dev`).
+# Для прод-секрета: в PowerShell задай $env:VENICE_API_KEY и выполни `npm run secret:upload`
+VENICE_API_KEY=

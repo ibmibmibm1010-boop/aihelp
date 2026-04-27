@@ -1,0 +1,12 @@
+node_modules
+dist
+.vite
+.env
+.env.production
+.env.development.local
+*.local
+.DS_Store
+supabase/.temp/
+e2e/.auth/
+test-results/
+playwright-report/
