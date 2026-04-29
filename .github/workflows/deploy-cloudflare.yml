@@ -184,5 +184,5 @@ jobs:
           fi
           npm run deploy:cf
 
-      - name: Deploy helloword (--config из корня монорепо)
-        run: npx wrangler deploy --config aibddck/helloword/wrangler.jsonc
+      - name: Deploy helloword (workspace cwd — без дубля пути в --config)
+        run: npm run deploy -w helloword
