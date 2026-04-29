@@ -22,9 +22,6 @@ function initialsFromLabel(label: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-const dotCanvasClass =
-  "min-h-0 min-h-[60vh] flex-1 overflow-auto rounded-2xl bg-[#e8eaef] ring-1 ring-slate-300/40 lg:min-h-0";
-
 export type BoardWhiteboardShellProps = {
   boardName: string;
   boardDescription?: string | null;
@@ -88,7 +85,7 @@ export function BoardWhiteboardShell({
           </Link>
           <Link
             to={backTo}
-            className={`${pressableBase} truncate text-sm font-bold tracking-tight text-ink sm:text-base`}
+            className={`${pressableBase} truncate text-sm font-bold tracking-tight text-ink sm:text-base lg:hidden`}
           >
             {t("common.logo")}
           </Link>
@@ -178,9 +175,41 @@ export function BoardWhiteboardShell({
         </div>
       </header>
 
-      <div className="relative flex min-h-0 flex-1 gap-0">
+      <div className="relative isolate min-h-0 flex flex-1 flex-col overflow-hidden">
+        <div
+          className="absolute inset-0 overflow-auto rounded-2xl bg-[#e8eaef] ring-1 ring-slate-300/40 lg:rounded-2xl"
+          style={{
+            backgroundImage: "radial-gradient(circle, #b8c0cc 1px, transparent 1px)",
+            backgroundSize: `${Math.max(12, Math.round(20 * (100 / zoom)))}px ${Math.max(12, Math.round(20 * (100 / zoom)))}px`,
+          }}
+        >
+          <div className="min-h-full min-h-[60vh] space-y-2 px-4 py-4 pl-[3.25rem] sm:px-6 sm:py-6 sm:pl-[3.75rem] lg:px-8 lg:py-8 lg:pl-[4.25rem]">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">{boardName}</h1>
+                {boardDescription ? (
+                  <p className="mt-1 max-w-2xl text-sm text-slate-600">{boardDescription}</p>
+                ) : null}
+              </div>
+              {showDelete && onDeleteBoard ? (
+                <button
+                  type="button"
+                  className={`${pressableBase} shrink-0 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700 shadow-sm hover:bg-red-50`}
+                  onClick={onDeleteBoard}
+                >
+                  {t("boards.detail.deleteBoard")}
+                </button>
+              ) : null}
+            </div>
+            {errorBanner ? (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800">{errorBanner}</p>
+            ) : null}
+            {children}
+          </div>
+        </div>
+
         <aside
-          className="pointer-events-none absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-1.5 lg:pointer-events-auto lg:flex"
+          className="pointer-events-none absolute left-2 top-1/2 z-40 hidden max-h-[calc(100vh-10rem)] -translate-y-1/2 flex-col gap-1.5 overflow-y-auto overflow-x-hidden overscroll-contain lg:pointer-events-auto lg:flex"
           aria-label={t("boardWorkspace.toolsLabel")}
         >
           <button
@@ -243,38 +272,6 @@ export function BoardWhiteboardShell({
             ···
           </button>
         </aside>
-
-        <div
-          className={`${dotCanvasClass} min-w-0 flex-1 pl-0 lg:pl-12`}
-          style={{
-            backgroundImage: "radial-gradient(circle, #b8c0cc 1px, transparent 1px)",
-            backgroundSize: `${Math.max(12, Math.round(20 * (100 / zoom)))}px ${Math.max(12, Math.round(20 * (100 / zoom)))}px`,
-          }}
-        >
-          <div className="space-y-2 p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">{boardName}</h1>
-                {boardDescription ? (
-                  <p className="mt-1 max-w-2xl text-sm text-slate-600">{boardDescription}</p>
-                ) : null}
-              </div>
-              {showDelete && onDeleteBoard ? (
-                <button
-                  type="button"
-                  className={`${pressableBase} shrink-0 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700 shadow-sm hover:bg-red-50`}
-                  onClick={onDeleteBoard}
-                >
-                  {t("boards.detail.deleteBoard")}
-                </button>
-              ) : null}
-            </div>
-            {errorBanner ? (
-              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800">{errorBanner}</p>
-            ) : null}
-            {children}
-          </div>
-        </div>
       </div>
 
       <div className="fixed bottom-6 right-6 z-20 flex items-center gap-1 rounded-xl border border-slate-200/90 bg-white/95 px-2 py-1.5 text-xs font-semibold text-slate-600 shadow-lg backdrop-blur-sm sm:bottom-8 sm:right-8">

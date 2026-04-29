@@ -9,6 +9,10 @@ import { AiAssistantWidget } from "@widgets";
 const shellAsideClass =
   "flex h-full min-h-0 flex-col rounded-vibe border border-vibe-line bg-white/90 p-4 shadow-lg shadow-vibe-purple/10 backdrop-blur-sm sm:p-5";
 
+/** Полоса навбора на странице доски: без «карточки», сплошная колонка с одной вертикальной границей */
+const shellAsideBoardCompactClass =
+  "flex h-full min-h-0 w-full flex-col rounded-none border-0 bg-white/95 p-2 shadow-none backdrop-blur-sm";
+
 const sectionLabelClass =
   "px-3 pb-2 pt-4 text-[11px] font-semibold uppercase tracking-wide text-vibe-muted first:pt-0";
 
@@ -66,7 +70,7 @@ function SidebarNavContent({
       <>
         <Link
           to="/boards"
-          className={`${pressableBase} mb-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-vibe text-sm font-bold text-vibe-purple shadow-sm hover:opacity-90`}
+          className={`${pressableBase} mb-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-vibe border border-vibe-line/80 text-sm font-bold text-vibe-purple shadow-sm hover:opacity-90`}
           title={t("common.logo")}
           aria-label={t("common.logo")}
           onClick={onNavigate}
@@ -75,7 +79,7 @@ function SidebarNavContent({
         </Link>
 
         <nav
-          className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto"
+          className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-y-auto"
           aria-label={t("shell.navMain")}
         >
           <NavLink
@@ -211,7 +215,7 @@ function AppShellLayout() {
 
   return (
     <PageBackdrop>
-      <div className="flex min-h-screen flex-col lg:flex-row lg:gap-3">
+      <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden lg:flex-row lg:items-stretch">
         <header className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-vibe-line bg-white/85 px-3 py-3 backdrop-blur-md lg:hidden">
           <Link
             to="/boards"
@@ -244,15 +248,17 @@ function AppShellLayout() {
 
         <aside
           id={drawerId}
-          className={`fixed inset-y-0 left-0 z-50 w-[min(18rem,100vw-2rem)] transform transition-transform duration-200 ease-out lg:static lg:z-0 lg:flex lg:shrink-0 lg:translate-x-0 lg:transform-none ${
-            /* w-16 + lg:m-4 сжимали внутрь ~32px — иконки 44px вылезали на заголовок доски */
-            sidebarCompact ? "lg:w-20" : "lg:w-64"
+          className={`fixed inset-y-0 left-0 z-50 w-[min(18rem,100vw-2rem)] border-r border-vibe-line bg-white/95 shadow-[4px_0_24px_-12px_rgba(15,23,42,0.12)] transform transition-transform duration-200 ease-out lg:static lg:z-0 lg:min-h-0 lg:flex lg:shrink-0 lg:translate-x-0 lg:transform-none lg:self-stretch lg:shadow-none ${
+            sidebarCompact ? "lg:w-[4.75rem]" : "lg:w-64"
           } ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         >
           <div
-            className={`${shellAsideClass} m-0 h-full rounded-none border-y-0 border-l-0 lg:min-h-[calc(100vh-2rem)] lg:rounded-vibe lg:border ${
-              /* Совпадает с lg:py-1 у колонки доски — одна линия по верху с шапкой whiteboard */
-              sidebarCompact ? "lg:mx-1 lg:mt-1 lg:mb-4 lg:items-center lg:p-2" : "lg:m-4"
+            className={`${
+              sidebarCompact ? shellAsideBoardCompactClass : shellAsideClass
+            } m-0 h-full min-h-0 rounded-none border-y-0 border-l-0 lg:min-h-0 lg:flex-1 ${
+              sidebarCompact
+                ? "items-center justify-start lg:border-0 lg:pt-3"
+                : "lg:min-h-[calc(100vh-2rem)] lg:rounded-vibe lg:border lg:m-4"
             }`}
           >
             <SidebarNavContent compact={sidebarCompact} onNavigate={closeMobile} />
