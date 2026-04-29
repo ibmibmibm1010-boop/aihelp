@@ -5,7 +5,8 @@
 #   E2E_USER_EMAIL, E2E_USER_PASSWORD — тестовый пользователь (для global-setup и сессии).
 # Опционально: E2E_SKIP_BOARD_E2E=1 (по умолчанию в workflow), если миграции boards на CI не настроены.
 #
-# PR из fork: секреты не передаются — job чаще всего упадёт; полный прогон — из основного репо или вручную (workflow_dispatch).
+# PR из fork / без E2E_USER_*: «сценарии с сессией» помечаются skipped (guest-тесты идут). Полный прогон —
+# из основного репо с секретами или вручную (workflow_dispatch).
 
 name: E2E (Playwright)
 

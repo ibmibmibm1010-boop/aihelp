@@ -1,6 +1,6 @@
-import { expect, test } from "./use-authed";
+import { describeAuthSuite as describeAuth, expect, test } from "./use-authed";
 
-test.describe("ИИ-помощник (сессия)", () => {
+describeAuth("ИИ-помощник (сессия)", () => {
   test("FAB открывает панель; при настроенном воркере — вкладки Диалог / План", async ({
     page,
   }) => {

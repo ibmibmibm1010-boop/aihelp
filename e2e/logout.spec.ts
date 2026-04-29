@@ -1,6 +1,6 @@
-import { expect, test } from "./use-authed";
+import { describeAuthSuite as describeAuth, expect, test } from "./use-authed";
 
-test.describe("Выход", () => {
+describeAuth("Выход", () => {
   test("выйти и снова требуется вход для /boards", async ({ page }) => {
     await page.goto("/boards");
     await expect(page.locator("#boards-list-heading")).toBeVisible();

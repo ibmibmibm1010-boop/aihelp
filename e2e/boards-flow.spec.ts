@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "./use-authed";
+import { e2eAuthEnvConfigured, expect, test, type Page } from "./use-authed";
 
 const prefix = process.env.E2E_BOARD_NAME_PREFIX ?? "E2E";
 
@@ -25,7 +25,12 @@ async function expectCreateBoardDialogClosed(page: Page): Promise<void> {
   }
 }
 
-const boardsSuite = skipMutations ? test.describe.skip : test.describe;
+const boardsSuite =
+  !e2eAuthEnvConfigured()
+    ? test.describe.skip
+    : skipMutations
+      ? test.describe.skip
+      : test.describe;
 
 boardsSuite("Доски и задачи (последовательно)", () => {
   test("список: создать, увидеть, удалить", async ({ page }) => {
