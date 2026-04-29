@@ -1,5 +1,6 @@
 /**
- * Применяет supabase/create_billing_payments.sql (нужен SUPABASE_ACCESS_TOKEN).
+ * Применяет supabase/migrations/20260429183000_billing_resolve_user_email.sql
+ * (нужны SUPABASE_ACCESS_TOKEN и VITE_SUPABASE_URL в .env / .env.local).
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -74,22 +75,21 @@ const projectRef =
   process.env.SUPABASE_PROJECT_REF?.trim() || refFromSupabaseUrl(url);
 
 if (!token) {
-  console.error(
-    [
-      "Нужен SUPABASE_ACCESS_TOKEN (личный токен): https://supabase.com/dashboard/account/tokens",
-      "Добавьте в .env или .env.local: SUPABASE_ACCESS_TOKEN=sbp_...",
-      "Затем: npm run db:apply-billing",
-    ].join("\n"),
-  );
+  console.error("Нужен SUPABASE_ACCESS_TOKEN в окружении или .env.local.");
   process.exit(1);
 }
 
 if (!projectRef) {
-  console.error("Нужен VITE_SUPABASE_URL.");
+  console.error("Нужен VITE_SUPABASE_URL или SUPABASE_PROJECT_REF.");
   process.exit(1);
 }
 
-const sqlPath = path.join(root, "supabase", "create_billing_payments.sql");
+const sqlPath = path.join(
+  root,
+  "supabase",
+  "migrations",
+  "20260429183000_billing_resolve_user_email.sql",
+);
 const query = stripSqlComments(readFileSync(sqlPath, "utf8"));
 
 const endpoint = `https://api.supabase.com/v1/projects/${projectRef}/database/query`;
@@ -108,7 +108,7 @@ if (!res.ok) {
   process.exit(1);
 }
 
-console.log("Таблица billing_payments создана / обновлена.");
+console.log("Функция billing_resolve_user_id_by_email создана / обновлена.");
 if (text && text !== "{}") {
   console.log(text.length > 500 ? `${text.slice(0, 500)}…` : text);
 }
