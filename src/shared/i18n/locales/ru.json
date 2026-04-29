@@ -293,7 +293,7 @@
     "payUnavailable": "Задайте VITE_STRIPE_PAYMENT_LINK в .env (URL Payment Link из Stripe Dashboard).",
     "payGuestHint": "Войдите, чтобы видеть историю. Откройте ссылку на оплату под своей учётной записью — так платёж привяжется к аккаунту (client_reference_id).",
     "paymentsEmpty": "Пока нет платежей.",
-    "paymentsEmptyHint": "Строку создаёт вебхук после успешной оплаты (Worker POST …/webhooks/stripe, событие checkout.session.completed). Открывайте оплату с этой страницы под своим логином, чтобы передался client_reference_id. Вернувшись из Stripe, нажмите «Обновить».",
+    "paymentsEmptyHint": "Строку создаёт вебхук после оплаты (Worker …/webhooks/stripe, checkout.session.completed). Оплату открывайте с этой страницы под своим логином — в ссылке должен быть client_reference_id. В Stripe Dashboard у Payment Link включите URL parameters → Client reference ID. Если ID не дошёл, привязка идёт по email из Checkout (нужна миграция billing_resolve_user_id_by_email в Supabase). После Stripe нажмите «Обновить».",
     "refreshPayments": "Обновить",
     "paymentsLoadError": "Не удалось загрузить платежи. Если таблицы public.billing_payments нет, выполните npm run db:apply-billing-payments."
   },

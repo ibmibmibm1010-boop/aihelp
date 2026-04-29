@@ -1,6 +1,7 @@
 -- История оплат Stripe (запись из Cloudflare Worker по webhook).
 -- RLS: пользователь видит только свои строки; вставка — только service_role (воркер).
 -- Применение: npm run db:apply-billing-payments (нужен SUPABASE_ACCESS_TOKEN).
+-- Запасной путь привязки платежа по email из Stripe Checkout: см. migrations/20260429183000_billing_resolve_user_email.sql
 
 create table if not exists public.billing_payments (
   id uuid primary key default gen_random_uuid(),

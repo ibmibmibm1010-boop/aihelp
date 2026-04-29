@@ -293,7 +293,7 @@
     "payUnavailable": "Set VITE_STRIPE_PAYMENT_LINK in .env (Payment Link URL from Stripe Dashboard).",
     "payGuestHint": "Sign in to see payment history. Use the payment link while signed in so Stripe can attach it to your account (client_reference_id).",
     "paymentsEmpty": "No payments yet.",
-    "paymentsEmptyHint": "A row is inserted by the Stripe webhook after a successful checkout (Worker POST …/webhooks/stripe, event checkout.session.completed). Pay from this page while signed in so client_reference_id is set. After returning from Stripe, tap Refresh.",
+    "paymentsEmptyHint": "A row is inserted by the webhook after payment (Worker …/webhooks/stripe, checkout.session.completed). Open checkout from this page while signed in so client_reference_id is appended. In Stripe Dashboard → Payment Link, allow URL parameters → Client reference ID. If the ID is dropped, we match Checkout email to your Supabase user (requires DB migration billing_resolve_user_id_by_email). After returning from Stripe, tap Refresh.",
     "refreshPayments": "Refresh",
     "paymentsLoadError": "Could not load payments. If public.billing_payments is missing, run npm run db:apply-billing-payments."
   },
