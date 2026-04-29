@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "@shared/lib/auth-context";
 
 import AccountPage from "../account";
+import BillingPage from "../billing";
 import BoardsPage from "../boards";
 import LandingPage from "../landing";
 import SettingsPage from "../settings";
@@ -18,6 +19,7 @@ const staticPages: { Component: ComponentType; heading: string }[] = [
   { Component: SignUpPage, heading: "Создать аккаунт" },
   { Component: BoardsPage, heading: "Доски" },
   { Component: AccountPage, heading: "Личный кабинет" },
+  { Component: BillingPage, heading: "Платежи и тариф" },
   { Component: SettingsPage, heading: "Настройки" },
 ];
 
@@ -36,6 +38,7 @@ function renderStaticPage(Component: ComponentType) {
     Component === SignUpPage ||
     Component === BoardsPage ||
     Component === AccountPage ||
+    Component === BillingPage ||
     Component === SettingsPage
   ) {
     return render(

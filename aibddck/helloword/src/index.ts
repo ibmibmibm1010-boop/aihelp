@@ -1,4 +1,5 @@
 import { breakTaskIntoSubtasks, runAssistantTurn, type AssistantTurnMessage } from './llm';
+import { handleStripeWebhook } from './stripe-webhook';
 
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
@@ -32,6 +33,8 @@ function jsonLlm(
 async function handleRequest(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
 		switch (url.pathname) {
+			case '/webhooks/stripe':
+				return handleStripeWebhook(request, env);
 			case '/message':
 				return new Response('Hello, World!');
 			case '/random':

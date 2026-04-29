@@ -67,7 +67,8 @@
     "settings": "Настройки",
     "toSite": "На сайт",
     "logout": "Выйти",
-    "navMain": "Основная навигация"
+    "navMain": "Основная навигация",
+    "navBilling": "Платежи"
   },
   "landing": {
     "signIn": "Войти",
@@ -256,6 +257,45 @@
         "untitled": "Без названия"
       }
     }
+  },
+  "billing": {
+    "title": "Платежи и тариф",
+    "lead": "Карточка тарифа ниже — заглушка; история платежей подтягивается из Supabase после успешной оплаты.",
+    "previewNote": "Блок тарифа — только превёрстка.",
+    "dash": "—",
+    "planSection": "Текущий тариф",
+    "planName": "Название",
+    "planPrice": "Цена",
+    "planRenewal": "Дата продления",
+    "paymentsSection": "История платежей",
+    "column.date": "Дата",
+    "column.amount": "Сумма",
+    "column.currency": "Валюта",
+    "column.status": "Статус",
+    "column.description": "Описание",
+    "planStatus": {
+      "active": "Активен",
+      "trial": "Пробный",
+      "pastDue": "Просрочен",
+      "cancelled": "Отменён"
+    },
+    "paymentStatus": {
+      "succeeded": "Успешно",
+      "pending": "В обработке",
+      "failed": "Неуспешно"
+    },
+    "interval": {
+      "month": "мес.",
+      "year": "год"
+    },
+    "pay": "Оплатить в Stripe",
+    "payActionLabel": "Оплата",
+    "payUnavailable": "Задайте VITE_STRIPE_PAYMENT_LINK в .env (URL Payment Link из Stripe Dashboard).",
+    "payGuestHint": "Войдите, чтобы видеть историю. Откройте ссылку на оплату под своей учётной записью — так платёж привяжется к аккаунту (client_reference_id).",
+    "paymentsEmpty": "Пока нет платежей.",
+    "paymentsEmptyHint": "Строку создаёт вебхук после успешной оплаты (Worker POST …/webhooks/stripe, событие checkout.session.completed). Открывайте оплату с этой страницы под своим логином, чтобы передался client_reference_id. Вернувшись из Stripe, нажмите «Обновить».",
+    "refreshPayments": "Обновить",
+    "paymentsLoadError": "Не удалось загрузить платежи. Если таблицы public.billing_payments нет, выполните npm run db:apply-billing-payments."
   },
   "account": {
     "title": "Личный кабинет",

@@ -7,6 +7,11 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		VENICE_API_KEY: string;
+		STRIPE_WEBHOOK_SECRET: string;
+		SUPABASE_URL: string;
+		SUPABASE_SERVICE_ROLE_KEY: string;
+		/** Любой валидный ключ Stripe только для экземпляра SDK при `constructEvent` (можно ограниченный ключ). */
+		STRIPE_SECRET_KEY?: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
@@ -14,7 +19,17 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "VENICE_API_KEY">> {}
+	interface ProcessEnv
+		extends StringifyValues<
+			Pick<
+				Cloudflare.Env,
+				| "VENICE_API_KEY"
+				| "STRIPE_WEBHOOK_SECRET"
+				| "SUPABASE_URL"
+				| "SUPABASE_SERVICE_ROLE_KEY"
+				| "STRIPE_SECRET_KEY"
+			>
+		> {}
 }
 
 // Begin runtime types

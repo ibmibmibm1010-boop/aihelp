@@ -83,78 +83,106 @@ jobs:
           fi
           echo "Секреты Cloudflare заданы (значения в лог не выводятся)."
 
-      - name: Проверка токена Cloudflare (не cfk_, валидность verify)
+      - name: Проверка токена Cloudflare (валидность + обрезка пробелов в секрете)
+        id: cf_token_kind
         run: |
-          T="${CLOUDFLARE_API_TOKEN}"
-          case "$T" in
+          set -euo pipefail
+          # Секрет иногда сохраняют с переводом строки на конце — тогда Bearer невалиден (401).
+          TOKEN=$(printf '%s' "${CLOUDFLARE_API_TOKEN}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          if [ -z "$TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN пуст (или только пробелы). Обновите секрет."
+            exit 1
+          fi
+
+          case "${TOKEN}" in
             cfk_*)
-              echo "::error::CLOUDFLARE_API_TOKEN похож на Global API Key (cfk_). Для GitHub Actions нужен User API Token (cfut_)."
-              echo "Создать: https://dash.cloudflare.com/profile/api-tokens → Create Token → Edit Cloudflare Workers"
-              echo "и добавить право User → User Details → Read. Вставьте значение в Settings → Secrets → Actions."
+              echo "::error::CLOUDFLARE_API_TOKEN похож на Global API Key (cfk_). Для Actions нужен API Token (префикс cfut_ или Account API Token)."
               exit 1
               ;;
-            cfat_*)
-              echo "::warning::Сейчас Account API Token (cfat_). Если деплой падает, замените на User API Token (cfut_) с тем же шаблоном прав."
-              ;;
           esac
-          CODE=$(curl -sS -o /tmp/cf_verify.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/user/tokens/verify")
-          if [ "$CODE" != "200" ]; then
-            echo "::error::Cloudflare отклонил токен (HTTP ${CODE}). Обновите CLOUDFLARE_API_TOKEN (cfut_, не cfk_)."
-            cat /tmp/cf_verify.json || true
-            exit 1
-          fi
-          if ! grep -q '"success"[[:space:]]*:[[:space:]]*true' /tmp/cf_verify.json; then
-            echo "::error::user/tokens/verify вернул success != true:"
-            cat /tmp/cf_verify.json
-            exit 1
-          fi
-          echo "Cloudflare API Token: verify OK"
 
-      - name: Права для wrangler (User Details + Memberships)
+          UW=$(curl -sS -o /tmp/cf_verify.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            "https://api.cloudflare.com/client/v4/user/tokens/verify")
+          UW_OK=no
+          if [ "$UW" = "200" ] && grep -q '"success"[[:space:]]*:[[:space:]]*true' /tmp/cf_verify.json; then
+            UW_OK=yes
+          fi
+
+          AC=$(curl -sS -o /tmp/cf_accounts.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}")
+
+          if [ "$UW_OK" = yes ]; then
+            {
+              echo "CLOUDFLARE_API_TOKEN<<__CF_EOF__"
+              printf '%s\n' "${TOKEN}"
+              echo "__CF_EOF__"
+            } >> "$GITHUB_ENV"
+            echo "token_kind=user" >> "$GITHUB_OUTPUT"
+            echo "Cloudflare User API Token: /user/tokens/verify OK"
+            exit 0
+          fi
+          if [ "$AC" = "200" ]; then
+            {
+              echo "CLOUDFLARE_API_TOKEN<<__CF_EOF__"
+              printf '%s\n' "${TOKEN}"
+              echo "__CF_EOF__"
+            } >> "$GITHUB_ENV"
+            echo "token_kind=account" >> "$GITHUB_OUTPUT"
+            echo "::notice::Токен валиден как Account-scoped: GET /accounts/{id}. Для только user-verify нужен cfut_, wrangler поддерживает и такой тип."
+            exit 0
+          fi
+
+          echo "::error::Токен не принят Cloudflare:"
+          echo "  • POST user/tokens/verify → HTTP ${UW}"
+          cat /tmp/cf_verify.json || true
+          echo "  • GET /accounts/${CLOUDFLARE_ACCOUNT_ID} → HTTP ${AC}"
+          cat /tmp/cf_accounts.json || true
+          echo "::error::Создайте новый User API Token: https://dash.cloudflare.com/profile/api-tokens → шаблон «Edit Cloudflare Workers»"
+          echo "Или проверьте CLOUDFLARE_ACCOUNT_ID совпадает с аккаунтом из дашборда (Workers → свой воркер → справа Account ID)."
+          echo "Secrets: https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
+          exit 1
+
+      - name: User API Token — /user и /memberships для wrangler
+        if: steps.cf_token_kind.outputs.token_kind == 'user'
         run: |
           err() {
             echo "::error::$1"
-            echo "Добавьте к User API Token: https://dash.cloudflare.com/profile/api-tokens"
-            echo "  • User → User Details → Read"
-            echo "  • User → Memberships → Read"
-            echo "Плюс Account → Workers Scripts → Edit (шаблон «Edit Cloudflare Workers»)."
-            echo "Секрет: https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
+            echo "Добавьте к User API Token: User Details → Read, Memberships → Read:"
+            echo "https://dash.cloudflare.com/profile/api-tokens"
             exit 1
           }
+          TOKEN=$(printf '%s' "${CLOUDFLARE_API_TOKEN}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
           U=$(curl -sS -o /tmp/cf_user.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Authorization: Bearer ${TOKEN}" \
             "https://api.cloudflare.com/client/v4/user")
           if [ "$U" != "200" ]; then
             cat /tmp/cf_user.json || true
-            err "GET /user → HTTP ${U}. Без User Details → Read wrangler падает (10000 / «Unable to retrieve email»)."
+            err "GET /user → HTTP ${U}."
           fi
           M=$(curl -sS -o /tmp/cf_mem.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Authorization: Bearer ${TOKEN}" \
             "https://api.cloudflare.com/client/v4/memberships")
           if [ "$M" != "200" ]; then
             cat /tmp/cf_mem.json || true
-            err "GET /memberships → HTTP ${M}. Нужно User → Memberships → Read."
+            err "GET /memberships → HTTP ${M}."
           fi
           echo "Cloudflare /user и /memberships: OK"
 
       - run: npm ci
 
-      - name: Build SPA
+      - name: Wrangler version
+        run: npx wrangler --version
+
+      - name: Сборка SPA и деплой papka2 (dist → wrangler)
         env:
           VITE_HELLOWORD_BASE_URL: ${{ secrets.VITE_HELLOWORD_BASE_URL }}
         run: |
           if [ -z "$VITE_HELLOWORD_BASE_URL" ]; then
             echo "::warning::VITE_HELLOWORD_BASE_URL пуст — в проде ИИ не подключится. Задайте секрет в Settings → Secrets → Actions."
           fi
-          npm run build
-
-      - name: Wrangler version
-        run: npx wrangler --version
-
-      - name: Deploy papka2 (root wrangler.toml)
-        run: npx wrangler deploy
+          npm run deploy:cf
 
       - name: Deploy helloword (--config из корня монорепо)
         run: npx wrangler deploy --config aibddck/helloword/wrangler.jsonc

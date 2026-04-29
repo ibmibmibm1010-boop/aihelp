@@ -14,6 +14,9 @@
     "dev:worker": "npm run dev -w helloword",
     "dev:all": "concurrently -k -n vite,worker -c cyan,magenta \"vite\" \"npm run dev -w helloword\"",
     "build": "tsc --noEmit && vite build",
+    "deploy:cf": "npm run build && wrangler deploy",
+    "deploy:cf:worker": "wrangler deploy --config aibddck/helloword/wrangler.jsonc",
+    "deploy:cf:all": "npm run build && wrangler deploy && wrangler deploy --config aibddck/helloword/wrangler.jsonc",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -30,7 +33,8 @@
     "db:apply-board-column-section": "node scripts/apply-board-column-section-migration.mjs",
     "db:apply-profiles": "node scripts/apply-profiles-migration.mjs",
     "db:apply-task-card-color": "node scripts/apply-task-card-color-migration.mjs",
-    "db:apply-task-attachments": "node scripts/apply-task-attachments-migration.mjs"
+    "db:apply-task-attachments": "node scripts/apply-task-attachments-migration.mjs",
+    "db:apply-billing-payments": "node scripts/apply-billing-payments-migration.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

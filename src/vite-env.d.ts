@@ -16,6 +16,11 @@ interface ImportMetaEnv {
    * В dev при отсутствии значения используется прокси Vite: `/api/helloword`.
    */
   readonly VITE_HELLOWORD_BASE_URL?: string;
+  /**
+   * Payment Link или Product Link из Stripe Dashboard (https://buy.stripe.com/...).
+   * Кнопка «Оплатить» на /billing ведёт на этот URL. Секретные ключи сюда не кладут.
+   */
+  readonly VITE_STRIPE_PAYMENT_LINK?: string;
 }
 
 interface ImportMeta {

@@ -34,12 +34,11 @@
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
 	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
+	 * Secrets (Stripe webhook + Supabase service role для записи платежей):
+	 * из каталога aibddck/helloword: npx wrangler secret put SUPABASE_URL | SUPABASE_SERVICE_ROLE_KEY |
+	 * STRIPE_WEBHOOK_SECRET | опционально STRIPE_SECRET_KEY (ключ API для экземпляра Stripe SDK).
+	 * Endpoint воркера: POST /webhooks/stripe — укажите в Stripe Dashboard → Webhooks.
 	 */
-	// "vars": {  "MY_VARIABLE": "production_value" }
 	/**
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings

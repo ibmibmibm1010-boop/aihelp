@@ -1,6 +1,7 @@
 # Имя воркера в Cloudflare (как в дашборде). Деплой из GitHub Actions идёт в аккаунт из
 # CLOUDFLARE_ACCOUNT_ID; при нескольких аккаунтах можно зафиксировать: account_id = "..."
 # Источник кода всегда репозиторий, где лежит этот файл — не «другой GitHub».
+# Сборка SPA обязательна перед deploy: npm run build (или одной командой: npm run deploy:cf).
 name = "papka2"
 compatibility_date = "2025-04-01"
 

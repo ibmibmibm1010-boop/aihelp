@@ -4,6 +4,7 @@ import { AppShell } from "../components/layout";
 import {
   AccountPage,
   AuthCallbackPage,
+  BillingPage,
   BoardDetailPage,
   BoardsPage,
   LandingPage,
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: "/boards", element: <BoardsPage /> },
       { path: "/boards/:boardId", element: <BoardDetailPage /> },
       { path: "/account", element: <AccountPage /> },
+      { path: "/billing", element: <BillingPage /> },
       { path: "/settings", element: <SettingsPage /> },
     ],
   },

@@ -17,6 +17,8 @@
     "wrangler": "^4.84.1"
   },
   "dependencies": {
-    "openai": "^6.34.0"
+    "@supabase/supabase-js": "^2.105.1",
+    "openai": "^6.34.0",
+    "stripe": "^22.1.0"
   }
 }

@@ -110,6 +110,15 @@ function SidebarNavContent({
           >
             <span aria-hidden>⚙</span>
           </NavLink>
+          <NavLink
+            to="/billing"
+            className={navLinkCompactClass}
+            title={t("shell.navBilling")}
+            aria-label={t("shell.navBilling")}
+            onClick={onNavigate}
+          >
+            <span aria-hidden>💳</span>
+          </NavLink>
         </nav>
 
         <div className="mt-2 flex flex-col items-center gap-1 border-t border-vibe-line pt-2">
@@ -168,6 +177,11 @@ function SidebarNavContent({
             <li>
               <NavLink to="/settings" className={navLinkClass} onClick={onNavigate}>
                 {t("shell.settings")}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/billing" className={navLinkClass} onClick={onNavigate}>
+                {t("shell.navBilling")}
               </NavLink>
             </li>
           </ul>

@@ -5,5 +5,6 @@ export { default as AuthCallbackPage } from "./auth-callback";
 export { default as BoardsPage } from "./boards";
 export { default as BoardDetailPage } from "./boards/BoardDetailPage";
 export { default as AccountPage } from "./account";
+export { default as BillingPage } from "./billing";
 export { default as SettingsPage } from "./settings";
 export { default as NotFoundPage } from "./not-found";

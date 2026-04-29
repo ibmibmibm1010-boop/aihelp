@@ -67,7 +67,8 @@
     "settings": "Settings",
     "toSite": "Marketing site",
     "logout": "Log out",
-    "navMain": "Main navigation"
+    "navMain": "Main navigation",
+    "navBilling": "Payments"
   },
   "landing": {
     "signIn": "Sign in",
@@ -256,6 +257,45 @@
         "untitled": "Untitled"
       }
     }
+  },
+  "billing": {
+    "title": "Payments & billing",
+    "lead": "The plan card below is a placeholder; payment history is loaded from Supabase after a successful checkout.",
+    "previewNote": "Plan block: layout preview only.",
+    "dash": "—",
+    "planSection": "Current plan",
+    "planName": "Plan",
+    "planPrice": "Price",
+    "planRenewal": "Renewal date",
+    "paymentsSection": "Payment history",
+    "column.date": "Date",
+    "column.amount": "Amount",
+    "column.currency": "Currency",
+    "column.status": "Status",
+    "column.description": "Description",
+    "planStatus": {
+      "active": "Active",
+      "trial": "Trial",
+      "pastDue": "Past due",
+      "cancelled": "Cancelled"
+    },
+    "paymentStatus": {
+      "succeeded": "Succeeded",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "interval": {
+      "month": "month",
+      "year": "year"
+    },
+    "pay": "Pay with Stripe",
+    "payActionLabel": "Checkout",
+    "payUnavailable": "Set VITE_STRIPE_PAYMENT_LINK in .env (Payment Link URL from Stripe Dashboard).",
+    "payGuestHint": "Sign in to see payment history. Use the payment link while signed in so Stripe can attach it to your account (client_reference_id).",
+    "paymentsEmpty": "No payments yet.",
+    "paymentsEmptyHint": "A row is inserted by the Stripe webhook after a successful checkout (Worker POST …/webhooks/stripe, event checkout.session.completed). Pay from this page while signed in so client_reference_id is set. After returning from Stripe, tap Refresh.",
+    "refreshPayments": "Refresh",
+    "paymentsLoadError": "Could not load payments. If public.billing_payments is missing, run npm run db:apply-billing-payments."
   },
   "account": {
     "title": "Account",
