@@ -9,7 +9,8 @@
 #       User → User Details → Read
 #       User → Memberships → Read
 #     (без них wrangler пишет «Unable to retrieve email» и падает на /workers/services/…)
-#   • Не используйте Global API Key (cfk_) — только User API Token (cfut_).
+#   • Пересоздайте токен в Cloudflare и заново вставьте в GitHub **Repository secrets**
+#     (Settings → Secrets → Actions). Старый токен после ротации перестаёт работать (401).
 
 name: Deploy Cloudflare Workers
 
@@ -133,6 +134,25 @@ jobs:
             echo "::notice::Токен валиден как Account-scoped: GET /accounts/{id}. Для только user-verify нужен cfut_, wrangler поддерживает и такой тип."
             exit 0
           fi
+
+          echo "::group::Диагностика (без вывода токена)"
+          echo "Длина токена после trim: ${#TOKEN} символов; начало (4 символа): ${TOKEN:0:4}***"
+          LA=$(curl -sS -o /tmp/cf_list.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts?per_page=50")
+          echo "GET /accounts (список) → HTTP ${LA}"
+          if [ "$LA" = "200" ]; then
+            echo "Доступные Cloudflare Account ID / имена — сравните с секретом CLOUDFLARE_ACCOUNT_ID:"
+            if command -v jq >/dev/null 2>&1; then
+              jq -r '.result[]? | "  • \(.id)  (\(.name))"' /tmp/cf_list.json 2>/dev/null || cat /tmp/cf_list.json
+            else
+              grep -oE '"id":"[a-f0-9]{32}"' /tmp/cf_list.json | head -20 || cat /tmp/cf_list.json
+            fi
+          else
+            echo "Список аккаунтов недоступен с этим токеном (токен невалиден или отозван — см. 401/403 выше)."
+            head -c 800 /tmp/cf_list.json || true
+          fi
+          echo "::endgroup::"
 
           echo "::error::Токен не принят Cloudflare:"
           echo "  • POST user/tokens/verify → HTTP ${UW}"
