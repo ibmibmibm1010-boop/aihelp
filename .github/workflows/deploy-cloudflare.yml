@@ -97,6 +97,30 @@ jobs:
             echo "::error::CLOUDFLARE_API_TOKEN пуст (или только пробелы). Обновите секрет."
             exit 1
           fi
+          TB=$(printf '%s' "$TOKEN" | sed 's/^[Bb][Ee][Aa][Rr][[:space:]]\{1,\}//')
+          if [ "$TB" != "$TOKEN" ]; then
+            echo "::warning::Удалён префикс «Bearer» — в секрет кладите только значение токена, без слова Bearer."
+            TOKEN="$TB"
+          fi
+          TOKEN=$(printf '%s' "$TOKEN" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          case "$TOKEN" in
+            \"*\"|\'*\')
+              echo "::warning::Убраны внешние кавычки — в GitHub Secret не используйте кавычки вокруг токена."
+              TOKEN="${TOKEN#\"}"
+              TOKEN="${TOKEN%\"}"
+              TOKEN="${TOKEN#\'}"
+              TOKEN="${TOKEN%\'}"
+              ;;
+          esac
+          TOKEN=$(printf '%s' "$TOKEN" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          if [ -z "$TOKEN" ]; then
+            echo "::error::После нормализации токен пуст. Проверьте значение секрета."
+            exit 1
+          fi
+          if printf '%s' "$TOKEN" | grep -q '[[:space:]]'; then
+            echo "::error::В токене остались пробелы — вероятно скопировано два значения сразу. Нужна одна строка токена."
+            exit 1
+          fi
 
           case "${TOKEN}" in
             cfk_*)
@@ -162,8 +186,12 @@ jobs:
           cat /tmp/cf_verify.json || true
           echo "  • GET /accounts/${CLOUDFLARE_ACCOUNT_ID} → HTTP ${AC}"
           cat /tmp/cf_accounts.json || true
-          echo "::error::Создайте новый User API Token: https://dash.cloudflare.com/profile/api-tokens → шаблон «Edit Cloudflare Workers»"
-          echo "Или проверьте CLOUDFLARE_ACCOUNT_ID совпадает с аккаунтом из дашборда (Workers → свой воркер → справа Account ID)."
+          echo "::error::Коды 401 (1000) и 403 (9109) при cfut_ почти всегда значат: токен отозван, истёк или в секрет попала не полная строка."
+          echo "Что сделать:"
+          echo "  1) https://dash.cloudflare.com/profile/api-tokens → Create Token → шаблон «Edit Cloudflare Workers» (или ручные права из комментария вверху workflow)."
+          echo "  2) Скопируйте токен один раз целиком; в GitHub → Settings → Secrets → Actions обновите CLOUDFLARE_API_TOKEN (без Bearer, без кавычек, одна строка)."
+          echo "  3) Убедитесь, что в секрет не попал Account ID (32 hex) и это не ключ из другого аккаунта Cloudflare."
+          echo "После сохранения секрета снова запустите workflow (push или Re-run)."
           echo "Secrets: https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
           exit 1
 
