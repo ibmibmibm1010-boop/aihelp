@@ -3,6 +3,7 @@
 #
 # Секrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
 #   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (иначе SPA соберётся без Supabase),
+#   VITE_STRIPE_PAYMENT_LINK (URL Payment Link — Dashboard → Payment links; иначе /billing без оплаты),
 #   (опц.) VITE_HELLOWORD_BASE_URL
 #
 # Токен для `wrangler deploy` (иначе Authentication error [code: 10000]):
@@ -201,12 +202,16 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_STRIPE_PAYMENT_LINK: ${{ secrets.VITE_STRIPE_PAYMENT_LINK }}
           VITE_HELLOWORD_BASE_URL: ${{ secrets.VITE_HELLOWORD_BASE_URL }}
         run: |
           if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
             echo "::error::Задайте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в Settings → Secrets → Actions (как в playwright-e2e)."
             echo "https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
             exit 1
+          fi
+          if [ -z "$VITE_STRIPE_PAYMENT_LINK" ]; then
+            echo "::warning::VITE_STRIPE_PAYMENT_LINK пуст — на /billing будет «Задайте … в .env». Добавьте секрет: URL Payment Link из Stripe Dashboard (как локальный .env)."
           fi
           if [ -z "$VITE_HELLOWORD_BASE_URL" ]; then
             echo "::warning::VITE_HELLOWORD_BASE_URL пуст — в проде ИИ не подключится. Задайте секрет в Settings → Secrets → Actions."
