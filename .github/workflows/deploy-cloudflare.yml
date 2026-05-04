@@ -1,7 +1,9 @@
 # Деплой при push в main: SPA (papka2) + воркер helloword.
 # Если в репо не заданы CLOUDFLARE_* — job деплоя пропускается (зелёный прогон, в логе notice).
 #
-# Секrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, (опц.) VITE_HELLOWORD_BASE_URL
+# Секrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (иначе SPA соберётся без Supabase),
+#   (опц.) VITE_HELLOWORD_BASE_URL
 #
 # Токен для `wrangler deploy` (иначе Authentication error [code: 10000]):
 #   • Лучше шаблон «Edit Cloudflare Workers» при создании токена.
@@ -197,8 +199,15 @@ jobs:
 
       - name: Сборка SPA и деплой papka2 (dist → wrangler)
         env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_HELLOWORD_BASE_URL: ${{ secrets.VITE_HELLOWORD_BASE_URL }}
         run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::error::Задайте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в Settings → Secrets → Actions (как в playwright-e2e)."
+            echo "https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
+            exit 1
+          fi
           if [ -z "$VITE_HELLOWORD_BASE_URL" ]; then
             echo "::warning::VITE_HELLOWORD_BASE_URL пуст — в проде ИИ не подключится. Задайте секрет в Settings → Secrets → Actions."
           fi
