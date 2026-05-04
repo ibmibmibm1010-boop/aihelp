@@ -39,6 +39,7 @@
 	 * Не указывайте `--config aibddck/helloword/wrangler.jsonc`, когда cwd уже этот каталог — путь удвоится (ENOENT).
 	 * Из корня монорепо можно: `npm exec --prefix aibddck/helloword -- wrangler secret put …`
 	 * Ключи: SUPABASE_SERVICE_ROLE_KEY | STRIPE_WEBHOOK_SECRET | опционально STRIPE_SECRET_KEY.
+	 * Telegram: TELEGRAM_BOT_INGEST_SECRET (общий с telegram-ok-bot, заголовок X-Telegram-Bot-Secret).
 	 * Endpoint воркера: POST /webhooks/stripe — укажите в Stripe Dashboard → Webhooks.
 	 */
 	/**

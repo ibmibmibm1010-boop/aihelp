@@ -321,7 +321,23 @@
     "appearance": "Appearance",
     "appearanceBody": "Light and dark themes, accents, and premium styling will appear here.",
     "notifications": "Notifications",
-    "notificationsBody": "Email and reminder settings — in future iterations."
+    "notificationsBody": "Email and reminder settings — in future iterations.",
+    "telegram": {
+      "title": "Telegram bot & tasks",
+      "body": "Enter your numeric Telegram user ID and a board. Messages to the bot in private chat will be split into tasks by the model and saved in the backlog column (linked_status=todo). One app account maps to one linked Telegram.",
+      "needLoginBlock": "Sign in — then you can link the bot.",
+      "needLogin": "Sign in first.",
+      "invalidTgId": "Enter your Telegram ID (digits only; you can ask bots like @userinfobot).",
+      "pickBoard": "Pick a board.",
+      "telegramIdLabel": "Your Telegram user ID",
+      "telegramIdPlaceholder": "e.g. 123456789",
+      "boardLabel": "Board for new tasks",
+      "noBoards": "No boards yet — create one under Boards.",
+      "hintBot": "Configure TELEGRAM_BOT_INGEST_SECRET on both the worker and the bot. The bot only accepts private chats.",
+      "save": "Save link",
+      "saving": "Saving…",
+      "saved": "Link saved. You can DM the bot tasks now."
+    }
   },
   "notFound": {
     "title": "Page not found",

@@ -1,5 +1,6 @@
 import { breakTaskIntoSubtasks, runAssistantTurn, type AssistantTurnMessage } from './llm';
 import { handleStripeWebhook } from './stripe-webhook';
+import { handleTelegramLinkAccount, handleTelegramTasksIngest } from './telegram-routes';
 
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
@@ -35,6 +36,10 @@ async function handleRequest(request: Request, env: Env, _ctx: ExecutionContext)
 		switch (url.pathname) {
 			case '/webhooks/stripe':
 				return handleStripeWebhook(request, env);
+			case '/telegram/link-account':
+				return handleTelegramLinkAccount(request, env);
+			case '/telegram/tasks-ingest':
+				return handleTelegramTasksIngest(request, env);
 			case '/message':
 				return new Response('Hello, World!');
 			case '/random':
@@ -185,6 +190,7 @@ async function handleRequest(request: Request, env: Env, _ctx: ExecutionContext)
 					billingStripeWebhookSecretConfigured: Boolean(env.STRIPE_WEBHOOK_SECRET?.trim()?.length),
 					billingSupabaseUrlConfigured: Boolean(env.SUPABASE_URL?.trim()?.length),
 					billingSupabaseServiceRoleConfigured: Boolean(env.SUPABASE_SERVICE_ROLE_KEY?.trim()?.length),
+					telegramBotIngestSecretConfigured: Boolean(env.TELEGRAM_BOT_INGEST_SECRET?.trim()?.length),
 					// должен появиться "VENICE_API_KEY"; если пусто — смотри `wrangler secret list`
 					bindingNames: Object.keys(e).sort(),
 				});

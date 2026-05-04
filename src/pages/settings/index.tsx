@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { TelegramLinkSettings } from "@widgets";
 import { hoverLiftCard } from "@shared/ui";
 
 const cardClass =
@@ -21,6 +22,10 @@ const SettingsPage = () => {
       </p>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <div className="lg:col-span-2">
+          <TelegramLinkSettings />
+        </div>
+
         <section className={cardClass} aria-labelledby="appearance-heading">
           <h2
             id="appearance-heading"

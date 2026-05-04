@@ -39,6 +39,7 @@
     "db:apply-billing-payments": "node scripts/apply-billing-payments-migration.mjs",
     "db:apply-billing-resolve": "node scripts/apply-billing-resolve-migration.mjs",
     "db:apply-billing": "node scripts/apply-billing-payments-migration.mjs && node scripts/apply-billing-resolve-migration.mjs",
+    "db:apply-telegram-user-links": "node scripts/apply-telegram-user-links-migration.mjs",
     "telegram:ok": "npm run build -w telegram-ok-bot && npm run start -w telegram-ok-bot"
   },
   "dependencies": {

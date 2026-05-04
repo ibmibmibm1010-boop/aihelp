@@ -10,6 +10,8 @@ declare namespace Cloudflare {
 		STRIPE_WEBHOOK_SECRET: string;
 		SUPABASE_URL: string;
 		SUPABASE_SERVICE_ROLE_KEY: string;
+		/** Общий секрет между telegram-ok-bot и POST /telegram/tasks-ingest (заголовок X-Telegram-Bot-Secret). */
+		TELEGRAM_BOT_INGEST_SECRET?: string;
 		/** Любой валидный ключ Stripe только для экземпляра SDK при `constructEvent` (можно ограниченный ключ). */
 		STRIPE_SECRET_KEY?: string;
 	}
@@ -27,6 +29,7 @@ declare namespace NodeJS {
 				| "STRIPE_WEBHOOK_SECRET"
 				| "SUPABASE_URL"
 				| "SUPABASE_SERVICE_ROLE_KEY"
+				| "TELEGRAM_BOT_INGEST_SECRET"
 				| "STRIPE_SECRET_KEY"
 			>
 		> {}

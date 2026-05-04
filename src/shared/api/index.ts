@@ -44,3 +44,4 @@ export {
 export { uploadTaskAttachment } from "./task-attachments";
 export type { AssistantMessage, LlmPingRequestBody, SubtaskItem } from "./venice-llm";
 export { DEFAULT_HELLOWORD_BASE_URL, decomposeTask, getVeniceWorkerBaseUrl, sendAssistantMessage } from "./venice-llm";
+export { linkTelegramToAccount } from "./telegram-link-account";
