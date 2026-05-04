@@ -11,26 +11,56 @@ dotenv.config({ path: path.join(repoRoot, ".env") });
 dotenv.config({ path: path.join(repoRoot, ".env.local"), override: true });
 dotenv.config({ path: path.join(packageRoot, ".env"), override: true });
 
+/** Синхронно с `DEFAULT_HELLOWORD_BASE_URL` в `src/shared/api/venice-llm.ts`. */
+const DEFAULT_HELLOWORD_WORKER_ORIGIN = "https://helloword.ibmibmibm1010.workers.dev";
+
+function resolveHellwordBase(): string {
+  let raw =
+    process.env.VITE_HELLOWORD_BASE_URL?.trim() ||
+    process.env.HELLOWORD_BASE_URL?.trim() ||
+    "";
+  if (!raw) {
+    console.warn(
+      `HELLOWORD_BASE_URL / VITE_HELLOWORD_BASE_URL не заданы — использую ${DEFAULT_HELLOWORD_WORKER_ORIGIN} (как у SPA по умолчанию).`,
+    );
+    raw = DEFAULT_HELLOWORD_WORKER_ORIGIN;
+  }
+  raw = raw.replace(/\/+$/, "");
+  if (raw === "/api/helloword" || raw.endsWith("/api/helloword")) {
+    console.warn(
+      "Для бота относительный прокси /api/helloword не подходит — подставляю http://127.0.0.1:8787 (wrangler dev helloword).",
+    );
+    return "http://127.0.0.1:8787";
+  }
+  if (raw.startsWith("/")) {
+    console.warn(
+      "Базовый URL воркера не может быть относительным для Node — подставляю http://127.0.0.1:8787. Задайте полный HTTPS воркера (*.workers.dev).",
+    );
+    return "http://127.0.0.1:8787";
+  }
+  try {
+    const u = new URL(raw);
+    if (u.hostname.endsWith(".pages.dev")) {
+      console.warn(
+        "Похоже, указан Cloudflare Pages (SPA), а не Worker helloword — POST /telegram/* даст 404. Задайте URL вида https://helloword.<account>.workers.dev или HELLOWORD_BASE_URL.",
+      );
+    }
+  } catch {
+    console.error("Некорректный HELLOWORD_BASE_URL / VITE_HELLOWORD_BASE_URL.");
+    process.exit(1);
+  }
+  return raw;
+}
+
+const HELLOWORD_BASE = resolveHellwordBase();
+console.log(`telegram-ok-bot: helloword base → ${HELLOWORD_BASE}`);
+
 const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
 if (!token) {
   console.error(
     "TELEGRAM_BOT_TOKEN не задан. Добавьте в корневой .env или в telegram-ok-bot/.env (см. telegram-ok-bot/.env.example).",
   );
   process.exit(1);
-}
-
-function hellwordBase(): string {
-  const raw =
-    process.env.VITE_HELLOWORD_BASE_URL?.trim() ||
-    process.env.HELLOWORD_BASE_URL?.trim() ||
-    "";
-  if (!raw) {
-    console.error(
-      "Задайте HELLOWORD_BASE_URL или VITE_HELLOWORD_BASE_URL (URL воркера helloword без слэша в конце).",
-    );
-    process.exit(1);
-  }
-  return raw.replace(/\/+$/, "");
 }
 
 const ingestSecretRaw = process.env.TELEGRAM_BOT_INGEST_SECRET?.trim();
@@ -55,7 +85,7 @@ async function ingestTasks(
   telegramUserId: number,
   text: string,
 ): Promise<TasksIngestSuccess | TasksIngestFail> {
-  const url = `${hellwordBase()}/telegram/tasks-ingest`;
+  const url = `${HELLOWORD_BASE}/telegram/tasks-ingest`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -64,11 +94,20 @@ async function ingestTasks(
     },
     body: JSON.stringify({ telegram_user_id: telegramUserId, text }),
   });
+  const bodyText = await res.text();
   let data: TasksIngestSuccess | TasksIngestFail;
   try {
-    data = (await res.json()) as TasksIngestSuccess | TasksIngestFail;
+    data = JSON.parse(bodyText) as TasksIngestSuccess | TasksIngestFail;
   } catch {
-    return { ok: false, error: `Ответ не JSON (HTTP ${res.status})` };
+    const hint404 =
+      res.status === 404
+        ? ` Проверьте URL воркера (не Cloudflare Pages): в .env должен быть тот же базовый URL, что и у deployed helloword, например ${DEFAULT_HELLOWORD_WORKER_ORIGIN}`
+        : "";
+    const preview = bodyText.trim().slice(0, 120);
+    return {
+      ok: false,
+      error: `Ответ не JSON (HTTP ${res.status})${preview ? `: ${preview}` : ""}.${hint404}`,
+    };
   }
   if (!data || typeof data !== "object") {
     return { ok: false, error: `Пустой ответ (HTTP ${res.status})` };

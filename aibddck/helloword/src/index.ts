@@ -33,7 +33,11 @@ function jsonLlm(
 
 async function handleRequest(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
-		switch (url.pathname) {
+		let pathname = url.pathname;
+		if (pathname.length > 1 && pathname.endsWith('/')) {
+			pathname = pathname.slice(0, -1);
+		}
+		switch (pathname) {
 			case '/webhooks/stripe':
 				return handleStripeWebhook(request, env);
 			case '/telegram/link-account':
@@ -196,7 +200,14 @@ async function handleRequest(request: Request, env: Env, _ctx: ExecutionContext)
 				});
 			}
 			default:
-				return new Response('Not Found', { status: 404 });
+				return jsonLlm(
+					{
+						ok: false,
+						code: 'not_found',
+						error: `Маршрут не найден: ${pathname}. Воркер helloword: POST /telegram/tasks-ingest, /telegram/link-account`,
+					},
+					404,
+				);
 		}
 }
 

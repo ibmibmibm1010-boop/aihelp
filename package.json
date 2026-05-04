@@ -40,6 +40,7 @@
     "db:apply-billing-resolve": "node scripts/apply-billing-resolve-migration.mjs",
     "db:apply-billing": "node scripts/apply-billing-payments-migration.mjs && node scripts/apply-billing-resolve-migration.mjs",
     "db:apply-telegram-user-links": "node scripts/apply-telegram-user-links-migration.mjs",
+    "set:telegram-ingest-secret": "node scripts/set-telegram-ingest-secret.mjs",
     "telegram:ok": "npm run build -w telegram-ok-bot && npm run start -w telegram-ok-bot"
   },
   "dependencies": {
