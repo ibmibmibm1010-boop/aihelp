@@ -41,9 +41,22 @@ function parseDotEnv(filepath) {
   return out;
 }
 
+const baseEnv = parseDotEnv(path.join(root, ".env"));
+const localEnv = parseDotEnv(path.join(root, ".env.local"));
+
+if (
+  baseEnv.CLOUDFLARE_API_TOKEN?.trim()?.length &&
+  localEnv.CLOUDFLARE_API_TOKEN?.trim()?.length &&
+  baseEnv.CLOUDFLARE_API_TOKEN.trim() !== localEnv.CLOUDFLARE_API_TOKEN.trim()
+) {
+  console.warn(
+    "[deploy-cf-from-env] В .env и .env.local разные CLOUDFLARE_API_TOKEN — wrangler получит значение из .env.local (он перекрывает .env).",
+  );
+}
+
 const merged = {
-  ...parseDotEnv(path.join(root, ".env")),
-  ...parseDotEnv(path.join(root, ".env.local")),
+  ...baseEnv,
+  ...localEnv,
 };
 
 const token = (merged.CLOUDFLARE_API_TOKEN ?? "").replace(/\r?\n/g, "").trim();
