@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "workspaces": [
-    "aibddck/helloword"
+    "aibddck/helloword",
+    "telegram-ok-bot"
   ],
   "engines": {
     "node": ">=20.0.0"
@@ -36,7 +37,8 @@
     "db:apply-task-attachments": "node scripts/apply-task-attachments-migration.mjs",
     "db:apply-billing-payments": "node scripts/apply-billing-payments-migration.mjs",
     "db:apply-billing-resolve": "node scripts/apply-billing-resolve-migration.mjs",
-    "db:apply-billing": "node scripts/apply-billing-payments-migration.mjs && node scripts/apply-billing-resolve-migration.mjs"
+    "db:apply-billing": "node scripts/apply-billing-payments-migration.mjs && node scripts/apply-billing-resolve-migration.mjs",
+    "telegram:ok": "npm run build -w telegram-ok-bot && npm run start -w telegram-ok-bot"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
