@@ -5,12 +5,17 @@ import dotenv from "dotenv";
 import { Telegraf } from "telegraf";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-dotenv.config({ path: path.join(packageRoot, ".env") });
+const repoRoot = path.resolve(packageRoot, "..");
+
+// Корневой .env монорепо → затем telegram-ok-bot/.env (перекрывает ключи)
+dotenv.config({ path: path.join(repoRoot, ".env") });
+dotenv.config({ path: path.join(repoRoot, ".env.local"), override: true });
+dotenv.config({ path: path.join(packageRoot, ".env"), override: true });
 
 const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
 if (!token) {
   console.error(
-    "TELEGRAM_BOT_TOKEN is not set. Copy telegram-ok-bot/.env.example to telegram-ok-bot/.env",
+    "TELEGRAM_BOT_TOKEN не задан. Добавьте в корневой .env или в telegram-ok-bot/.env (см. telegram-ok-bot/.env.example).",
   );
   process.exit(1);
 }
