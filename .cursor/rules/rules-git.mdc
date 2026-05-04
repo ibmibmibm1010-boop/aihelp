@@ -2,22 +2,22 @@
 alwaysApply: true
 ---
 
-**Два remote с разными ролями (не дублировать URL у раз имён):**
+**Два remote с разными ролями (не дублировать URL у разных имён):**
 
 | Remote   | Репозиторий | Роль |
 |----------|-------------|------|
-| **`origin`** | `https://github.com/ibmibmibm1010-boop/aihelp` | Канон: **`git pull` / `git push`** по умолчанию, ветки, **PR в `main`**, обсуждение ревью. GitHub Actions (в т.ч. Cloudflare) — от пушей в **этот** репозиторий. |
-| **`dash2`**  | `https://github.com/ibmibmibm1010-boop/-2-`      | Вторичный: зеркало / резерв / отдельный контур. **`git push dash2 …` / `git pull dash2 …`** только когда пользователь **явно** просит синхронизировать с `-2-`. |
+| **`origin`** | `https://github.com/ibmibmibm1010-boop/-2-` | Канон: **`git pull` / `git push`** по умолчанию — основной репозиторий пользователя. |
+| **`aihelp`**  | `https://github.com/ibmibmibm1010-boop/aihelp` | Вторичный: **GitHub Actions** (Cloudflare и т.д.), PR/ревью при синхронизации с **`aihelp`**. **`git push aihelp …` / `git pull aihelp …`** — когда нужно обновить тот репозиторий. |
 
 **Поведение ассистента**
 
-- Обычные команды (`push`, `pull`, сравнение с `main`) — относительно **`origin` (aihelp)**.
-- Не предлагать «запушить ещё и в dash2» без запроса пользователя.
-- Не добавлять третьи remotes и не подмешивать другие URL без прямой просьбы.
+- Обычные команды (`push`, `pull`, сравнение с `main`) — относительно **`origin` (-2-)**.
+- Пуш в **`aihelp`** — только по явной просьбе пользователя (CI, зеркало).
+- Не добавлять лишние remotes и не подмешивать другие URL без прямой просьбы.
 
-**Проверка локальной конфигурации:** `git remote -v` — у `origin` и `dash2` должны быть **разные** URL, как в таблице выше. Если оба указывают на один и тот же репозиторий, выровнять:
+**Проверка локальной конфигурации:** `git remote -v` — у `origin` и `aihelp` должны быть **разные** URL, как в таблице выше. Если оба указывают на один репозиторий, выровнять:
 
 ```bash
-git remote set-url origin https://github.com/ibmibmibm1010-boop/aihelp.git
-git remote set-url dash2 https://github.com/ibmibmibm1010-boop/-2-.git
+git remote set-url origin https://github.com/ibmibmibm1010-boop/-2-.git
+git remote set-url aihelp https://github.com/ibmibmibm1010-boop/aihelp.git
 ```
