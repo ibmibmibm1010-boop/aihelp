@@ -238,7 +238,7 @@ function BillingPage() {
                   <tr>
                     <td colSpan={5} className="px-4 py-6 text-left text-vibe-muted">
                       <p className="text-center font-medium text-ink">{t("billing.paymentsEmpty")}</p>
-                      <p className="mx-auto mt-3 max-w-xl text-center text-xs leading-relaxed">
+                      <p className="mx-auto mt-3 max-w-xl whitespace-pre-line text-center text-xs leading-relaxed">
                         {t("billing.paymentsEmptyHint")}
                       </p>
                     </td>

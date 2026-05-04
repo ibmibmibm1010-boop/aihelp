@@ -10,3 +10,5 @@ supabase/.temp/
 e2e/.auth/
 test-results/
 playwright-report/
+# Локальная копия репозитория / вложенный клон — не коммитить.
+/aihelp/

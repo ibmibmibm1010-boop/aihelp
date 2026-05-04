@@ -293,7 +293,7 @@
     "payUnavailable": "Задайте VITE_STRIPE_PAYMENT_LINK в .env (URL Payment Link из Stripe Dashboard).",
     "payGuestHint": "Войдите, чтобы видеть историю. Откройте ссылку на оплату под своей учётной записью — так платёж привяжется к аккаунту (client_reference_id).",
     "paymentsEmpty": "Пока нет платежей.",
-    "paymentsEmptyHint": "Строка появится после события Stripe checkout.session.completed на воркере (POST …/webhooks/stripe). Проверьте: в Stripe → Developers → Webhooks URL = ваш прод-helloword …/webhooks/stripe, Signing secret совпадает с секретом STRIPE_WEBHOOK_SECRET в Worker. Оплату начинайте с этой страницы под аккаунтом (в ссылке будет client_reference_id). В настройках Payment Link разрешите URL parameters → Client reference ID. Если ID не дошёл — привязка по email из Checkout (нужна миграция: npm run db:apply-billing). После возврата из Stripe нажмите «Обновить».",
+    "paymentsEmptyHint": "Строка появится после события checkout.session.completed на воркере (POST …/webhooks/stripe).\n\nПроверьте: Stripe → Developers → Webhooks — endpoint = URL прод-helloword …/webhooks/stripe; Signing secret совпадает с STRIPE_WEBHOOK_SECRET в Cloudflare (wrangler secret).\n\nОплату начинайте с этой страницы под аккаунтом (в ссылке будет client_reference_id). В настройках Payment Link разрешите передачу URL parameters / Client reference ID.\n\nЕсли нет таблицы: npm run db:apply-billing-payments. После возврата из Stripe — «Обновить».\n\nПривязка только по email из Checkout пока не реализована — это отдельная доработка.",
     "refreshPayments": "Обновить",
     "paymentsLoadError": "Не удалось загрузить платежи. Если таблицы public.billing_payments нет, выполните npm run db:apply-billing-payments."
   },

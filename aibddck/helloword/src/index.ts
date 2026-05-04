@@ -174,8 +174,17 @@ async function handleRequest(request: Request, env: Env, _ctx: ExecutionContext)
 			/** Проверка, что VENICE_API_KEY попал в воркер (значения секретов не раскрываются). */
 			case '/env-check': {
 				const e = env as unknown as Record<string, unknown>;
+				const webhookOk = Boolean(
+					env.STRIPE_WEBHOOK_SECRET?.trim()?.length &&
+						env.SUPABASE_URL?.trim()?.length &&
+						env.SUPABASE_SERVICE_ROLE_KEY?.trim()?.length,
+				);
 				return Response.json({
 					veniceKeyConfigured: Boolean(env.VENICE_API_KEY?.length),
+					billingWebhookReady: webhookOk,
+					billingStripeWebhookSecretConfigured: Boolean(env.STRIPE_WEBHOOK_SECRET?.trim()?.length),
+					billingSupabaseUrlConfigured: Boolean(env.SUPABASE_URL?.trim()?.length),
+					billingSupabaseServiceRoleConfigured: Boolean(env.SUPABASE_SERVICE_ROLE_KEY?.trim()?.length),
 					// должен появиться "VENICE_API_KEY"; если пусто — смотри `wrangler secret list`
 					bindingNames: Object.keys(e).sort(),
 				});

@@ -187,8 +187,19 @@ export async function handleStripeWebhook(request: Request, env: Env): Promise<R
 	const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
 	if (!webhookSecret || !supabaseUrl || !serviceKey) {
-		console.error('Stripe webhook: нет STRIPE_WEBHOOK_SECRET / SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY');
-		return Response.json({ error: 'Misconfigured' }, { status: 503 });
+		const missingSecrets: string[] = [];
+		if (!webhookSecret) missingSecrets.push('STRIPE_WEBHOOK_SECRET');
+		if (!supabaseUrl) missingSecrets.push('SUPABASE_URL');
+		if (!serviceKey) missingSecrets.push('SUPABASE_SERVICE_ROLE_KEY');
+		console.error('Stripe webhook: misconfigured:', missingSecrets.join(', '));
+		return Response.json(
+			{
+				error: 'Misconfigured',
+				missingSecrets,
+				hint: 'wrangler secret put <NAME> --config aibddck/helloword/wrangler.jsonc',
+			},
+			{ status: 503 },
+		);
 	}
 
 	const sig = request.headers.get('stripe-signature');
@@ -206,6 +217,7 @@ export async function handleStripeWebhook(request: Request, env: Env): Promise<R
 	let event: Stripe.Event;
 	try {
 		const stripe = getStripeSdk(env);
+		// Workers: проверка подписи через Web Crypto — нужен constructEventAsync, не constructEvent.
 		event = (await stripe.webhooks.constructEventAsync(
 			rawBody,
 			sig,
